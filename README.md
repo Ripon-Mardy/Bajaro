@@ -1,8 +1,8 @@
-# santal-mart
+# Bajaro
 
 **One Marketplace. Thousands of Stores.**
 
-santal-mart is a full-stack, multi-vendor ecommerce marketplace — customers shop from thousands of independent stores, sellers run a store with their own dashboard, and platform admins moderate and operate the whole marketplace from one console.
+Bajaro is a full-stack, multi-vendor ecommerce marketplace — customers shop from thousands of independent stores, sellers run a store with their own dashboard, and platform admins moderate and operate the whole marketplace from one console.
 
 This is a real, working application: every button in this README's feature list is backed by a database write, a server-side authorization check, and (where money or inventory is involved) a database transaction. Nothing here is a static mockup.
 
@@ -90,49 +90,6 @@ src/
   generated/prisma/   # generated Prisma client (gitignored)
 ```
 
-## Getting Started
-
-```bash
-npm install
-
-# Start Postgres — pick ONE:
-docker compose up -d postgres          # option A: Docker (recommended for a real setup)
-npx prisma dev                         # option B: no Docker/sudo needed — see note below
-
-npx prisma generate
-npx prisma migrate dev
-npx prisma db seed
-
-npm run dev
-```
-
-Then visit `http://localhost:3000` and sign in with one of the [demo accounts](#demo-accounts).
-
-> **No Docker or sudo available?** `npx prisma dev` starts a local Postgres server in user space (no root/Docker needed) and prints a `DATABASE_URL` — paste it into `.env`. It's genuinely real Postgres and everything in this app works against it identically to Docker, with one caveat: its connection is proxied, and the `pg` driver's prepared-statement caching doesn't get along with that proxy under sustained concurrent load (this is what `vitest.config.mts`'s `fileParallelism: false` works around for the test suite). For anything beyond local development/demos — and especially before deploying — use Docker Postgres or a real hosted Postgres instead.
-
-Other commands:
-
-```bash
-npm run build   # production build
-npm run start   # run the production build
-npm run lint    # ESLint
-npm run test    # Vitest (some tests need a live, migrated DATABASE_URL — see Testing)
-```
-
-## Docker
-
-## Demo Accounts
-
-Seeded by `prisma/seed.ts` — **development/demo only**, never use these in a real deployment.
-
-The seed also creates 2 admins, 10 sellers/stores, 30 customers, 100+ products across 21 categories and 15 brands, 55+ orders in various lifecycle states, reviews, returns, payouts, coupons, and banners — by calling the same `createOrder` / `updateSellerOrderStatus` / `createReview` / `requestReturn` services a real user would trigger, not a separate fake-data path.
-
-## Testing
-
-```bash
-npm run test
-```
-
 `src/services/__tests__/commission.service.test.ts` is pure and needs no database. The rest (`inventory.service.test.ts`, `coupon.service.test.ts`, `authorization-boundary.test.ts`) run against the real `DATABASE_URL` — run `npx prisma migrate dev` first. Highlights:
 
 - **Oversell prevention**: two simultaneous `reserveAndSell` calls for the last unit of stock — exactly one succeeds, inventory never goes negative.
@@ -159,5 +116,3 @@ Given the size of this spec, this README is explicit about depth rather than sil
 - Auth-adjacent routes (password reset requests) are rate-limited.
 - `next.config.ts` sets standard security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`).
 - `npm audit` reports 4 high-severity advisories in `mysql2`/`deepmerge-ts` — these are transitive dependencies of the Prisma **CLI's** multi-database config support and are never loaded by the running application (this project only uses the PostgreSQL adapter at runtime).
-
-# santal-mart
